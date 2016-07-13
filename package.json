@@ -1,0 +1,10 @@
+{
+  "name": "test-redis",
+  "version": "0.0.1",
+  "main": "test_redis.js",
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "redis": "^2.6.0-2"
+  }
+
+}
