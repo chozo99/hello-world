@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+############################################################
+## Initialize
+set -e # stop for when error occured
+
+# https://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
+# arg1 : ${BASH_SOURCE[0]}
+get_current_dir() {
+    set -e # stop for when error occured
+    SOURCE="$1"
+    while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+      DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+      SOURCE="$(readlink "$SOURCE")"
+      [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+    done
+
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    echo $DIR
+}
+
+SCRIPT_DIR=$(get_current_dir "${BASH_SOURCE[0]}")
+echo "SCRIPT_DIR: ${SCRIPT_DIR}"
+
+. ${SCRIPT_DIR}/function/utils
+. ${SCRIPT_DIR}/function/git
+
+############################################################
+## Process
+
+# set working directory
+WORKDIR="/home/chozo99/workspace/hello-world"
+cd ${WORKDIR}
+log "WORKDIR: ${WORKDIR}"
+
+log "git fetch start"
+git fetch
+log "git fetch end"
+
+log "check local/remote/base git rev ..."
+
+# Up-to-date,  Need to pull, Need to push, Diverged
+NEED_GIT_PULL=$(does_it_need_git_pull)
+log "does_it_need_git_pull result: ${NEED_GIT_PULL}"
+
+if [ "${NEED_GIT_PULL}" == "Up-to-date" ]; then
+    log "SKIP"
+    exit 0;
+elif [ "${NEED_GIT_PULL}" != "Need to pull" ]; then
+    log "ERROR"
+    exit -1;
+fi
+
+log "git pull start"
+git pull
+log "git pull end"
